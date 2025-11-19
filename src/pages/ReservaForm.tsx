@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { format } from 'date-fns'
+import { ptBR } from 'date-fns/locale'
 import { reservasApi, salasApi } from '../services/api'
 import type { ReservaFormData, Sala } from '../types'
 import toast from 'react-hot-toast'
@@ -84,7 +85,52 @@ export default function ReservaForm() {
       }
       navigate('/reservas')
     } catch (error: any) {
-      toast.error(error.response?.data?.detail || 'Erro ao salvar reserva')
+      // Tratamento especial para conflitos de horário (erro 409)
+      if (error.response?.status === 409) {
+        const salaNome = salas.find(s => s.id === data.sala_id)?.nome || 'a sala selecionada'
+        const dataInicioFormatada = format(new Date(data.data_inicio), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })
+        const dataFimFormatada = format(new Date(data.data_fim), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })
+        
+        // Notificação customizada e explicativa
+        toast.error(
+          <div className="max-w-md">
+            <div className="font-semibold text-base mb-2 flex items-center">
+              <span className="mr-2">⚠️</span>
+              Não foi possível criar a reserva
+            </div>
+            <div className="text-sm space-y-1">
+              <p>
+                Já existe uma reserva para <strong className="font-semibold">{salaNome}</strong> no horário:
+              </p>
+              <p className="ml-4">
+                📅 <strong>De:</strong> {dataInicioFormatada}
+              </p>
+              <p className="ml-4">
+                📅 <strong>Até:</strong> {dataFimFormatada}
+              </p>
+              <p className="text-xs mt-3 pt-2 border-t border-red-200 text-gray-600">
+                💡 <strong>Dica:</strong> Escolha outro horário ou selecione uma sala diferente.
+              </p>
+            </div>
+          </div>,
+          {
+            duration: 8000, // Mostrar por 8 segundos
+            style: {
+              maxWidth: '500px',
+              padding: '16px',
+            },
+          }
+        )
+      } else if (error.response?.status === 400) {
+        // Erro de validação
+        const mensagemErro = error.response?.data?.detail || 'Dados inválidos'
+        toast.error(mensagemErro, {
+          duration: 4000,
+        })
+      } else {
+        // Outros erros
+        toast.error(error.response?.data?.detail || 'Erro ao salvar reserva')
+      }
     } finally {
       setLoading(false)
     }
