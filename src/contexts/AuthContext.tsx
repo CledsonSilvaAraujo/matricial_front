@@ -44,6 +44,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const userData = await authApi.me()
       setUser(userData)
       toast.success('Login realizado com sucesso!')
+      return userData
     } catch (error: any) {
       toast.error(error.response?.data?.detail || 'Erro ao fazer login')
       throw error

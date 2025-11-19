@@ -17,12 +17,16 @@ export default function Login() {
     try {
       if (isLogin) {
         await login(formData.email, formData.senha)
+        // Redirecionar após login bem-sucedido
+        navigate('/reservas', { replace: true })
       } else {
         await register(formData.nome, formData.email, formData.senha)
+        // Após registro, fazer login automaticamente
+        await login(formData.email, formData.senha)
         setIsLogin(true)
         setFormData({ nome: '', email: '', senha: '' })
+        navigate('/reservas', { replace: true })
       }
-      navigate('/reservas')
     } catch (error) {
       // Erro já tratado no contexto
     }
