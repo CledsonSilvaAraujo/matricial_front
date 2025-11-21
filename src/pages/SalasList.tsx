@@ -125,12 +125,19 @@ export default function SalasList() {
         </button>
       </div>
 
-      {/* Formulário */}
-      {showForm && (
-        <div className="bg-white shadow rounded-lg p-6 mb-6">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">
-            {editingSala ? 'Editar Sala' : 'Nova Sala'}
-          </h3>
+      {/* Formulário para Nova Sala (apenas quando não está editando) */}
+      {showForm && !editingSala && (
+        <div className="bg-white shadow-md rounded-lg p-6 mb-6 border-2 border-primary-300">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold text-gray-900">Nova Sala</h3>
+            <button
+              onClick={resetForm}
+              className="text-gray-400 hover:text-gray-600 text-xl"
+              title="Fechar formulário"
+            >
+              ✕
+            </button>
+          </div>
           <form onSubmit={handleSubmit}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
@@ -206,7 +213,7 @@ export default function SalasList() {
                 type="submit"
                 className="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-md text-sm font-medium"
               >
-                {editingSala ? 'Atualizar' : 'Criar'}
+                Criar
               </button>
             </div>
           </form>
@@ -215,61 +222,209 @@ export default function SalasList() {
 
       {/* Lista de Salas */}
       {salas.length === 0 ? (
-        <div className="bg-white rounded-lg shadow p-8 text-center">
-          <p className="text-gray-500">Nenhuma sala cadastrada.</p>
+        <div className="bg-white rounded-lg shadow p-12 text-center">
+          <div className="text-gray-400 text-6xl mb-4">🏢</div>
+          <p className="text-gray-500 text-lg">Nenhuma sala cadastrada.</p>
+          <p className="text-gray-400 text-sm mt-2">Crie sua primeira sala clicando no botão acima.</p>
         </div>
       ) : (
-        <div className="bg-white shadow overflow-hidden sm:rounded-md">
-          <ul className="divide-y divide-gray-200">
-            {salas.map((sala) => (
-              <li key={sala.id} className="px-6 py-4 hover:bg-gray-50">
-                <div className="flex items-center justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center">
-                      <h3 className="text-lg font-medium text-gray-900">{sala.nome}</h3>
-                      <span className={`ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                        sala.ativa
-                          ? 'bg-green-100 text-green-800'
-                          : 'bg-red-100 text-red-800'
-                      }`}>
-                        {sala.ativa ? 'Ativa' : 'Inativa'}
-                      </span>
+        <>
+          {/* Formulário de Edição (aparece no topo quando está editando) */}
+          {editingSala && (
+            <div className="bg-white rounded-lg shadow-md border-2 border-primary-300 overflow-hidden md:col-span-2 lg:col-span-3 mb-4">
+              <div className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold text-gray-900">Editar Sala</h3>
+                  <button
+                    onClick={resetForm}
+                    className="text-gray-400 hover:text-gray-600 text-xl"
+                    title="Cancelar edição"
+                  >
+                    ✕
+                  </button>
+                </div>
+                <form onSubmit={handleSubmit}>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Nome <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={formData.nome}
+                        onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
+                        required
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                      />
                     </div>
-                    <div className="mt-2 text-sm text-gray-500">
-                      <p>
-                        <span className="font-medium">Local:</span> {sala.local}
-                      </p>
-                      {sala.capacidade && (
-                        <p>
-                          <span className="font-medium">Capacidade:</span> {sala.capacidade} pessoas
-                        </p>
-                      )}
-                      {sala.descricao && (
-                        <p className="mt-1">
-                          <span className="font-medium">Descrição:</span> {sala.descricao}
-                        </p>
-                      )}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Local <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={formData.local}
+                        onChange={(e) => setFormData({ ...formData, local: e.target.value })}
+                        required
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Capacidade
+                      </label>
+                      <input
+                        type="number"
+                        value={formData.capacidade}
+                        onChange={(e) => setFormData({ ...formData, capacidade: e.target.value })}
+                        min="1"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Status
+                      </label>
+                      <select
+                        value={formData.ativa ? 'true' : 'false'}
+                        onChange={(e) => setFormData({ ...formData, ativa: e.target.value === 'true' })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                      >
+                        <option value="true">Ativa</option>
+                        <option value="false">Inativa</option>
+                      </select>
+                    </div>
+                    <div className="md:col-span-2">
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Descrição
+                      </label>
+                      <textarea
+                        value={formData.descricao}
+                        onChange={(e) => setFormData({ ...formData, descricao: e.target.value })}
+                        rows={3}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                      />
                     </div>
                   </div>
-                  <div className="flex space-x-2">
+                  <div className="mt-4 flex justify-end space-x-3">
+                    <button
+                      type="button"
+                      onClick={resetForm}
+                      className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      type="submit"
+                      className="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-md text-sm font-medium"
+                    >
+                      Atualizar
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
+
+          {/* Grid de Cards (oculta a sala que está sendo editada) */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {salas
+              .filter((sala) => !editingSala || editingSala.id !== sala.id)
+              .map((sala) => (
+              <div
+                key={sala.id}
+                className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 border border-gray-100 overflow-hidden"
+              >
+                <div className="p-6">
+                  {/* Cabeçalho do Card */}
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-2">
+                        <div className={`flex-shrink-0 w-12 h-12 rounded-lg flex items-center justify-center ${
+                          sala.ativa ? 'bg-green-100' : 'bg-gray-100'
+                        }`}>
+                          <span className={`text-xl ${sala.ativa ? 'text-green-600' : 'text-gray-400'}`}>
+                            {sala.ativa ? '🏢' : '🚫'}
+                          </span>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="text-xl font-bold text-gray-900 truncate">
+                            {sala.nome}
+                          </h3>
+                        </div>
+                      </div>
+                    </div>
+                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold border ${
+                      sala.ativa
+                        ? 'bg-green-100 text-green-800 border-green-200'
+                        : 'bg-red-100 text-red-800 border-red-200'
+                    }`}>
+                      {sala.ativa ? '✓ Ativa' : '✗ Inativa'}
+                    </span>
+                  </div>
+
+                  {/* Informações Principais */}
+                  <div className="space-y-3 mb-4">
+                    <div className="bg-gray-50 rounded-lg p-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="text-gray-400">📍</span>
+                        <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                          Localização
+                        </span>
+                      </div>
+                      <p className="text-base font-medium text-gray-900 pl-6">{sala.local}</p>
+                    </div>
+
+                    {sala.capacidade && (
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className="text-blue-400">👥</span>
+                          <span className="text-xs font-semibold text-blue-600 uppercase tracking-wide">
+                            Capacidade
+                          </span>
+                        </div>
+                        <p className="text-base font-medium text-blue-900 pl-6">
+                          {sala.capacidade} {sala.capacidade === 1 ? 'pessoa' : 'pessoas'}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Descrição */}
+                  {sala.descricao && (
+                    <div className="border-t border-gray-200 pt-4 mb-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="text-gray-400">📝</span>
+                        <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                          Descrição
+                        </span>
+                      </div>
+                      <p className="text-sm text-gray-700 pl-6">{sala.descricao}</p>
+                    </div>
+                  )}
+
+                  {/* Ações */}
+                  <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-200">
                     <button
                       onClick={() => handleEdit(sala)}
-                      className="text-primary-600 hover:text-primary-800 text-sm font-medium"
+                      className="inline-flex items-center gap-2 px-4 py-2 bg-primary-50 text-primary-700 rounded-md text-sm font-medium hover:bg-primary-100 transition-colors"
                     >
-                      Editar
+                      <span>✏️</span>
+                      <span>Editar</span>
                     </button>
                     <button
                       onClick={() => handleDeleteClick(sala.id)}
-                      className="text-red-600 hover:text-red-800 text-sm font-medium"
+                      className="inline-flex items-center gap-2 px-4 py-2 bg-red-50 text-red-700 rounded-md text-sm font-medium hover:bg-red-100 transition-colors"
                     >
-                      Excluir
+                      <span>🗑️</span>
+                      <span>Excluir</span>
                     </button>
-                  </div>
                 </div>
-              </li>
-            ))}
-          </ul>
-        </div>
+              </div>
+            </div>
+              ))}
+          </div>
+        </>
       )}
 
       <Modal
